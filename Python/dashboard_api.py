@@ -16,7 +16,7 @@ event_logger = EventLogger()
 
 @app.get("/")
 async def read_index():
-    return {"status": "Server is running"}
+    return FileResponse(os.path.join(BASE_DIR, "index.html"))
     
 
 @app.get("/health")
@@ -47,15 +47,18 @@ async def get_recent_logs():
 async def get_active_trades():
     return list(state_engine.get_state()["active_trades"].values())
 
+DB_PATH = os.path.join(BASE_DIR, "trading_bot_audit.db")
+
 @app.get("/trades/closed")
 async def get_closed_trades():
     try:
-        conn = sqlite3.connect("trading_bot_audit.db")
+        conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM trades ORDER BY exit_time DESC LIMIT 10")
         return [dict(r) for r in cursor.fetchall()]
-    except: return []
+    except:
+        return []
 
 if __name__ == "__main__":
     import os
