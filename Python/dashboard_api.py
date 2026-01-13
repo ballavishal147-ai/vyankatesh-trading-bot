@@ -13,6 +13,8 @@ from the.event_logger import EventLogger
 
 app = FastAPI()
 event_logger = EventLogger()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "trading_bot_audit.db")
 
 @app.get("/")
 async def read_index():
