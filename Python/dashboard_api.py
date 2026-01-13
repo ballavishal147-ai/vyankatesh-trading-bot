@@ -16,7 +16,8 @@ event_logger = EventLogger()
 
 @app.get("/")
 async def read_index():
-    return FileResponse('index.html')
+    return {"status": "Server is running"}
+    
 
 @app.get("/health")
 async def get_health():
