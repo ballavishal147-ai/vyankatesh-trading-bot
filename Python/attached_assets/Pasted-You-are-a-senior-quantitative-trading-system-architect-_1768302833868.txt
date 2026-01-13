@@ -1,0 +1,161 @@
+You are a senior quantitative trading system architect.
+
+GOAL:
+Upgrade the existing intraday paper-trading bot to STRATEGY VERSION v2 with smarter entries, adaptive risk, better profit management and market-aware behavior.
+
+IMPORTANT RULES:
+- DO NOT add any live trading
+- DO NOT use broker APIs
+- DO NOT add loss-based strategy switching (POINT-6 is excluded)
+- Paper trading only
+- Everything must remain explainable and visible on dashboard
+
+EXISTING FILES (DO NOT REMOVE):
+- market_data_and_signal.py
+- trade_execution_and_mode.py
+- trade_management_and_risk.py
+- state_manager.py
+- event_logger.py
+- dashboard_api.py
+
+────────────────────────────
+1️⃣ ENTRY CONFIRMATION FILTER
+────────────────────────────
+Modify `market_data_and_signal.py`:
+
+Add confirmation conditions before sending BUY/SELL signal:
+- Trend conditions must be true
+- Latest candle must close above previous high (BUY)
+- Latest candle must close below previous low (SELL)
+- Volume spike must be ≥ 1.2 × average volume
+
+If confirmation fails:
+- Signal = NO_TRADE
+- Store rejection reason in BOT_THINKING
+
+────────────────────────────
+2️⃣ WEIGHTED CONFIDENCE ENGINE
+────────────────────────────
+Replace static confidence with weighted scoring:
+
+Factors & weights:
+- Trend strength → 35%
+- Volume alignment → 20%
+- RSI alignment → 20%
+- Volatility (ATR) → 15%
+- Time-of-day score → 10%
+
+Total confidence = weighted sum (0–100)
+
+Store:
+- Individual scores
+- Final confidence
+- Explanation text
+
+────────────────────────────
+3️⃣ ADAPTIVE STOP-LOSS SYSTEM
+────────────────────────────
+Modify `trade_management_and_risk.py`:
+
+Stop-loss must be:
+- Swing high/low based
+- ATR buffer added
+- Market regime aware:
+  - Trending → wider SL
+  - Choppy → tighter SL
+
+Store SL logic explanation in trade metadata
+
+────────────────────────────
+4️⃣ PARTIAL PROFIT BOOKING LOGIC
+────────────────────────────
+Upgrade exit logic:
+
+Trade management rules:
+- 50% exit at 1R
+- 25% trailing stop
+- 25% runner till reversal or time exit
+
+All partial exits must be logged clearly
+
+────────────────────────────
+5️⃣ TIME-BASED TRADE FILTER
+────────────────────────────
+Add time segmentation logic:
+
+Time behavior:
+- 9:15–9:30 → Observe only (NO ENTRY)
+- 9:30–11:30 → Aggressive mode
+- 11:30–1:30 → Conservative mode
+- 1:30–2:30 → Quick scalp only
+- 2:30 PM → Force exit all trades
+
+Time score must affect confidence calculation
+
+────────────────────────────
+6️⃣ MARKET REGIME DETECTION
+────────────────────────────
+Create Market Regime Engine:
+
+Regimes:
+- TRENDING
+- SIDEWAYS
+- VOLATILE
+
+Detection based on:
+- EMA spread
+- ATR %
+- Price structure
+
+Behavior:
+- Trending → normal strategy
+- Sideways → NO_TRADE or scalp
+- Volatile → reduced size & tighter SL
+
+Store regime info in BOT_THINKING
+
+────────────────────────────
+7️⃣ STRATEGY VERSIONING
+────────────────────────────
+Add version tracking:
+
+- Strategy Version: v2.0
+- Compare:
+  - Win rate
+  - Avg R:R
+  - Drawdown
+- Dashboard must show active version
+
+────────────────────────────
+8️⃣ FAIL-SAFE RULES
+────────────────────────────
+Add safety guards:
+
+- 3 consecutive losses → 30 min cooldown
+- Data inconsistency → NO_TRADE
+- Dashboard alert in RED
+
+────────────────────────────
+9️⃣ DASHBOARD VISIBILITY
+────────────────────────────
+Expose all new logic to dashboard:
+- Confidence breakdown
+- Market regime
+- Time mode
+- Partial exits
+- Strategy version
+
+No hidden logic allowed.
+
+────────────────────────────
+OUTPUT REQUIREMENTS
+────────────────────────────
+- System must remain modular
+- All bots must stay connected
+- Every decision must have a WHY
+- Ready for future broker integration
+- Paper trading only
+
+FINAL NOTE:
+DO NOT implement loss-based strategy switching.
+DO NOT use real APIs.

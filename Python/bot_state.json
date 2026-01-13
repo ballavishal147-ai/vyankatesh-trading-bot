@@ -1,0 +1,57 @@
+{
+    "system_mode": "PAPER",
+    "kill_switch": {
+        "stop_new_trades": true,
+        "full_system_freeze": false,
+        "symbol_block": []
+    },
+    "daily_loss": {
+        "limit": 150.0,
+        "current": -267.40923167294386,
+        "breached": true
+    },
+    "active_trades": {
+        "TRD_1768298119_BTCUSDT": {
+            "trade_id": "TRD_1768298119_BTCUSDT",
+            "symbol": "BTCUSDT",
+            "direction": "BUY",
+            "quantity": 1,
+            "entry_price": 52248.02206987105,
+            "order_type": "MARKET",
+            "timestamp": "2026-01-13T09:55:19.435755",
+            "mode": "PAPER",
+            "status": "OPEN",
+            "signal_id": "Positive momentum detected"
+        }
+    },
+    "market_data": {
+        "NIFTY": {
+            "symbol": "NIFTY",
+            "open": 25165.428800123882,
+            "high": 25203.240004855663,
+            "low": 25162.92363357885,
+            "close": 25201.46869387543,
+            "volume": 2531,
+            "timestamp": "2026-01-13 09:56:05"
+        },
+        "BANKNIFTY": {
+            "symbol": "BANKNIFTY",
+            "open": 24783.84844558735,
+            "high": 24835.783820670822,
+            "low": 24780.754249961,
+            "close": 24833.123923050374,
+            "volume": 2311,
+            "timestamp": "2026-01-13 09:56:05"
+        },
+        "BTCUSDT": {
+            "symbol": "BTCUSDT",
+            "open": 52155.56652516606,
+            "high": 52247.92389157902,
+            "low": 52152.288330073796,
+            "close": 52245.2605247633,
+            "volume": 2305,
+            "timestamp": "2026-01-13 09:56:05"
+        }
+    },
+    "date": "2026-01-13"
+}

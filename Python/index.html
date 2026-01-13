@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CYBER-TERMINAL v2.0 - STRATEGY PRO</title>
+    <style>
+        :root { --bg: #05070a; --neon: #00ff9d; --red: #ff3e3e; --gold: #f0b90b; --blue: #00d4ff; --card: rgba(20,25,35,0.8); }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 15px; }
+        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; }
+        .header { grid-column: span 12; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon); padding-bottom: 10px; }
+        .stat { text-align: center; }
+        .label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .val { font-size: 18px; font-weight: bold; }
+        .neon-text { color: var(--neon); text-shadow: 0 0 5px var(--neon); }
+        .breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; margin-top: 10px; }
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; background: rgba(255,255,255,0.1); }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th { text-align: left; color: #666; padding: 5px; border-bottom: 1px solid #333; }
+        td { padding: 8px 5px; border-bottom: 1px solid #222; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stat"><div class="label">Strategy</div><div class="val neon-text" id="v-version">v2.0</div></div>
+        <div class="stat"><div class="label">Market Regime</div><div class="val" id="v-regime" style="color:var(--blue)">TRENDING</div></div>
+        <div class="stat"><div class="label">Daily P&L</div><div class="val" id="v-pnl">₹0.00</div></div>
+        <div class="stat"><div class="label">System Health</div><div class="val" id="v-health" style="color:var(--neon)">READY</div></div>
+    </div>
+
+    <div class="grid" style="margin-top:20px">
+        <!-- Confidence Engine -->
+        <div class="card" style="grid-column: span 4">
+            <h2 style="font-size:14px;color:var(--gold)">CONFIDENCE ENGINE</h2>
+            <div style="font-size:24px;text-align:center" id="v-conf">0%</div>
+            <div class="breakdown" id="v-breakdown">
+                <div>Trend: <span id="b-trend">-</span></div>
+                <div>Volume: <span id="b-vol">-</span></div>
+                <div>RSI: <span id="b-rsi">-</span></div>
+                <div>ATR: <span id="b-atr">-</span></div>
+            </div>
+        </div>
+
+        <!-- Thinking -->
+        <div class="card" style="grid-column: span 4">
+            <h2 style="font-size:14px;color:var(--neon)">BOT THINKING</h2>
+            <div id="v-think" style="font-size:12px; line-height:1.4">Analyzing market...</div>
+            <div id="v-rej" style="color:var(--red); font-size:11px; margin-top:10px"></div>
+        </div>
+
+        <!-- Logs -->
+        <div class="card" style="grid-column: span 4">
+            <h2 style="font-size:14px;color:var(--blue)">NARRATIVE FEED</h2>
+            <div id="v-logs" style="font-size:10px; height:120px; overflow-y:auto"></div>
+        </div>
+
+        <!-- Trades -->
+        <div class="card" style="grid-column: span 12">
+            <h2 style="font-size:14px">ACTIVE v2.0 POSITIONS</h2>
+            <table id="v-trades">
+                <thead><tr><th>ID</th><th>Symbol</th><th>Side</th><th>Entry</th><th>Qty</th><th>Status</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function update() {
+            try {
+                const s = await (await fetch('/status')).json();
+                const t = await (await fetch('/trades/active')).json();
+                const l = await (await fetch('/logs/recent')).json();
+
+                document.getElementById('v-pnl').innerText = `₹${s.daily_pnl.toFixed(2)}`;
+                document.getElementById('v-pnl').style.color = s.daily_pnl >= 0 ? 'var(--neon)' : 'var(--red)';
+                document.getElementById('v-regime').innerText = s.thinking.market_mode;
+                document.getElementById('v-conf').innerText = `${s.thinking.signal_confidence}%`;
+                document.getElementById('v-think').innerText = s.thinking.trade_decision_reason;
+                document.getElementById('v-rej').innerText = s.thinking.trade_rejection_reason !== 'None' ? `REJECTED: ${s.thinking.trade_rejection_reason}` : '';
+                
+                const b = s.thinking.v2_breakdown || {};
+                document.getElementById('b-trend').innerText = b.trend || '-';
+                document.getElementById('b-vol').innerText = b.volume || '-';
+                document.getElementById('b-rsi').innerText = b.rsi || '-';
+                document.getElementById('b-atr').innerText = b.volatility || '-';
+
+                document.getElementById('v-logs').innerHTML = l.map(log => `<div>[${log.timestamp.split('T')[1].slice(0,5)}] ${log.message}</div>`).join('');
+                
+                document.querySelector('#v-trades tbody').innerHTML = t.map(tr => `
+                    <tr>
+                        <td>${tr.trade_id.slice(-5)}</td>
+                        <td>${tr.symbol}</td>
+                        <td style="color:${tr.direction == 'BUY' ? 'var(--neon)' : 'var(--red)'}">${tr.direction}</td>
+                        <td>${tr.entry_price.toFixed(2)}</td>
+                        <td>${tr.quantity} ${tr.partial_done ? '(PARTIAL)' : ''}</td>
+                        <td>RUNNING</td>
+                    </tr>
+                `).join('');
+            } catch(e) {}
+        }
+        setInterval(update, 2000);
+        update();
+    </script>
+</body>
+</html>
